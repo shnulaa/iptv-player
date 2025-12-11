@@ -38,12 +38,27 @@ router.get('/hls', async (req, res) => {
 
     // 获取请求的基础URL用于构建代理链接
     // 自动检测协议：优先使用 HTTPS 以避免混合内容问题
-    let protocol = req.headers['x-forwarded-proto'] || req.protocol;
+    const headers = {
+      'x-forwarded-proto': req.headers['x-forwarded-proto'],
+      'x-forwarded-host': req.headers['x-forwarded-host'],
+      'x-forwarded-ssl': req.headers['x-forwarded-ssl'],
+      'x-forwarded-https': req.headers['x-forwarded-https'],
+      'x-scheme': req.headers['x-scheme'],
+      'x-real-scheme': req.headers['x-real-scheme']
+    };
+
+    let protocol = req.headers['x-forwarded-proto'] ||
+                  req.headers['x-scheme'] ||
+                  req.headers['x-real-scheme'] ||
+                  req.protocol;
+
     const host = req.headers['x-forwarded-host'] || req.get('host');
 
     // 如果原请求是 HTTPS 或通过代理转发 HTTPS，强制使用 HTTPS
     if (req.secure ||
         req.headers['x-forwarded-proto'] === 'https' ||
+        req.headers['x-scheme'] === 'https' ||
+        req.headers['x-real-scheme'] === 'https' ||
         req.headers['x-forwarded-ssl'] === 'on' ||
         req.headers['x-forwarded-https'] === 'on') {
       protocol = 'https';
@@ -51,7 +66,14 @@ router.get('/hls', async (req, res) => {
 
     const baseUrl = `${protocol}://${host}`;
 
-    console.log('[Proxy Route] HLS proxy request:', { originalUrl: url, baseUrl, host, protocol });
+    console.log('[Proxy Route] Protocol detection details:', {
+      originalUrl: url,
+      baseUrl,
+      host,
+      protocol,
+      isSecure: req.secure,
+      headers
+    });
 
     const content = await proxyService.proxyM3U8(url, baseUrl);
 
