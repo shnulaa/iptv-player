@@ -20,7 +20,7 @@ router.get('/m3u', async (req, res) => {
     if (!url) {
       return res.status(400).json({ success: false, error: '缺少URL参数' });
     }
-    
+
     const content = await proxyService.fetchM3U(url);
     res.type('text/plain').send(content);
   } catch (error) {
@@ -37,12 +37,15 @@ router.get('/hls', async (req, res) => {
     }
 
     // 获取请求的基础URL用于构建代理链接
-    // 优先使用 HTTPS 以避免混合内容问题
+    // 自动检测协议：优先使用 HTTPS 以避免混合内容问题
     let protocol = req.headers['x-forwarded-proto'] || req.protocol;
     const host = req.headers['x-forwarded-host'] || req.get('host');
 
-    // 如果原请求是 HTTPS，强制使用 HTTPS
-    if (req.secure || req.headers['x-forwarded-proto'] === 'https' || host.includes('https://')) {
+    // 如果原请求是 HTTPS 或通过代理转发 HTTPS，强制使用 HTTPS
+    if (req.secure ||
+        req.headers['x-forwarded-proto'] === 'https' ||
+        req.headers['x-forwarded-ssl'] === 'on' ||
+        req.headers['x-forwarded-https'] === 'on') {
       protocol = 'https';
     }
 
@@ -75,8 +78,6 @@ router.get('/stream', async (req, res) => {
     if (!url) {
       return res.status(400).json({ success: false, error: '缺少URL参数' });
     }
-
-    console.log('[Proxy Route] Stream proxy request:', { originalUrl: url, host: req.get('host') });
 
     const result = await proxyService.proxyStream(url);
 
