@@ -12,7 +12,9 @@
       "Bash(netstat:*)",
       "Bash(ss:*)",
       "Bash(kill:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(curl:*)"
     ]
   }
 }

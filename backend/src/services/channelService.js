@@ -9,8 +9,9 @@ class ChannelService {
 
   // 获取所有分组
   getAllGroups() {
-    const rows = db.prepare('SELECT DISTINCT group_title FROM channels ORDER BY group_title').all();
-    return ['全部', ...rows.map(r => r.group_title)];
+    const rows = db.prepare('SELECT DISTINCT group_title FROM channels WHERE group_title IS NOT NULL ORDER BY group_title').all();
+    const groups = rows.map(r => r.group_title).filter(g => g && g.trim());
+    return ['全部', ...groups];
   }
 
   // 根据条件查询频道
@@ -37,29 +38,31 @@ class ChannelService {
     return db.prepare(sql).all(params);
   }
 
-  // 添加频道
+  // 添加频道 - 修复: 同时支持 group 和 group_title
   addChannel(channel) {
     const id = channel.id || uuidv4();
+    const groupTitle = channel.group_title || channel.group || '未分类';
+    
     const stmt = db.prepare(`
       INSERT INTO channels (id, name, url, logo, group_title, tvg_id, tvg_name, status)
       VALUES (@id, @name, @url, @logo, @group_title, @tvg_id, @tvg_name, @status)
     `);
-    
+
     stmt.run({
       id,
       name: channel.name,
       url: channel.url,
       logo: channel.logo || null,
-      group_title: channel.group || '未分类',
-      tvg_id: channel.tvgId || null,
-      tvg_name: channel.tvgName || null,
+      group_title: groupTitle,
+      tvg_id: channel.tvg_id || channel.tvgId || null,
+      tvg_name: channel.tvg_name || channel.tvgName || null,
       status: channel.status || 'unknown',
     });
-    
+
     return this.getChannelById(id);
   }
 
-  // 批量添加频道
+  // 批量添加频道 - 修复: 同时支持 group 和 group_title
   addChannels(channels) {
     const stmt = db.prepare(`
       INSERT OR REPLACE INTO channels (id, name, url, logo, group_title, tvg_id, tvg_name, status)
@@ -68,21 +71,22 @@ class ChannelService {
 
     const insertMany = db.transaction((channels) => {
       for (const channel of channels) {
+        const groupTitle = channel.group_title || channel.group || '未分类';
         stmt.run({
           id: channel.id || uuidv4(),
           name: channel.name,
           url: channel.url,
           logo: channel.logo || null,
-          group_title: channel.group || '未分类',
-          tvg_id: channel.tvgId || null,
-          tvg_name: channel.tvgName || null,
+          group_title: groupTitle,
+          tvg_id: channel.tvg_id || channel.tvgId || null,
+          tvg_name: channel.tvg_name || channel.tvgName || null,
           status: channel.status || 'unknown',
         });
       }
     });
 
     insertMany(channels);
-    return this.getAllChannels();
+    return { count: channels.length };
   }
 
   // 更新频道
@@ -102,28 +106,32 @@ class ChannelService {
       fields.push('logo = @logo');
       params.logo = updates.logo;
     }
-    if (updates.group !== undefined) {
+    if (updates.group !== undefined || updates.group_title !== undefined) {
       fields.push('group_title = @group_title');
-      params.group_title = updates.group;
+      params.group_title = updates.group_title || updates.group;
     }
     if (updates.status !== undefined) {
       fields.push('status = @status');
       params.status = updates.status;
     }
-    if (updates.responseTime !== undefined) {
+    if (updates.responseTime !== undefined || updates.response_time !== undefined) {
       fields.push('response_time = @response_time');
-      params.response_time = updates.responseTime;
+      params.response_time = updates.responseTime || updates.response_time;
     }
-    if (updates.lastTested !== undefined) {
+    if (updates.lastTested !== undefined || updates.last_tested !== undefined) {
       fields.push('last_tested = @last_tested');
-      params.last_tested = updates.lastTested;
+      params.last_tested = updates.lastTested || updates.last_tested;
+    }
+
+    if (fields.length === 0) {
+      return this.getChannelById(id);
     }
 
     fields.push('updated_at = strftime("%s", "now")');
 
     const sql = `UPDATE channels SET ${fields.join(', ')} WHERE id = @id`;
     db.prepare(sql).run(params);
-    
+
     return this.getChannelById(id);
   }
 
@@ -147,7 +155,7 @@ class ChannelService {
     const total = db.prepare('SELECT COUNT(*) as count FROM channels').get().count;
     const online = db.prepare('SELECT COUNT(*) as count FROM channels WHERE status = ?').get('online').count;
     const offline = db.prepare('SELECT COUNT(*) as count FROM channels WHERE status = ?').get('offline').count;
-    const unknown = db.prepare('SELECT COUNT(*) as count FROM channels WHERE status = ?').get('unknown').count;
+    const unknown = db.prepare('SELECT COUNT(*) as count FROM channels WHERE status NOT IN (?, ?)').get('online', 'offline').count;
     return { total, online, offline, unknown };
   }
 }
