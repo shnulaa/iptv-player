@@ -3,7 +3,16 @@
     "allow": [
       "Bash(npm run dev:*)",
       "Bash(npm install:*)",
-      "Bash(npm start)"
+      "Bash(npm start)",
+      "Bash(pkill:*)",
+      "Bash(sudo fuser:*)",
+      "Bash(sudo:*)",
+      "Bash(lsof:*)",
+      "Bash(xargs kill:*)",
+      "Bash(netstat:*)",
+      "Bash(ss:*)",
+      "Bash(kill:*)",
+      "Bash(git add:*)"
     ]
   }
 }

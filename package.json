@@ -1,12 +1,15 @@
 {
-  "name": "iptv-player",
+  "name": "iptv-player-fullstack",
   "version": "3.0.0",
   "private": true,
   "scripts": {
-    "install:all": "cd server && npm install && cd ../client && npm install",
-    "dev": "concurrently \"cd server && npm run dev\" \"cd client && npm start\"",
-    "build": "cd client && npm run build",
-    "start": "cd server && npm start"
+    "install:all": "cd backend && npm install && cd ../frontend && npm install",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd backend && npm start",
+    "dev:frontend": "cd frontend && npm start",
+    "build": "cd frontend && npm run build",
+    "start": "cd backend && npm start",
+    "start:docker": "HOST=0.0.0.0 PORT=3000 node backend/src/index.js"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"

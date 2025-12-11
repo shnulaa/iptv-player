@@ -1,0 +1,13 @@
+version: '3.8'
+services:
+  iptv-player:
+    build: .
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./backend/data:/app/backend/data
+    environment:
+      - HOST=0.0.0.0
+      - PORT=3000
+    network_mode: host
+    restart: unless-stopped
