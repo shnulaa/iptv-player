@@ -60,7 +60,8 @@ router.get('/hls', async (req, res) => {
         req.headers['x-scheme'] === 'https' ||
         req.headers['x-real-scheme'] === 'https' ||
         req.headers['x-forwarded-ssl'] === 'on' ||
-        req.headers['x-forwarded-https'] === 'on') {
+        req.headers['x-forwarded-https'] === 'on' ||
+        (host && (host.includes('iptv.liuyq.co') || host.includes('iptv.')))) {
       protocol = 'https';
     }
 

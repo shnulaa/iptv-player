@@ -62,8 +62,8 @@ class ProxyService {
         }
 
         // 处理TS文件或子m3u8链接
-        console.log('[ProxyService] baseUrl22:', baseUrl  , ' fullUrl:', fullUrl);
         const fullUrl = this.resolveUrl(line, streamBaseUrl, url);
+        console.log('[ProxyService] baseUrl22:', baseUrl  , ' fullUrl:', fullUrl);
         return `${baseUrl}/api/proxy/stream?url=${encodeURIComponent(fullUrl)}`;
       });
 
