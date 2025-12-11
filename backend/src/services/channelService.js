@@ -127,7 +127,7 @@ class ChannelService {
       return this.getChannelById(id);
     }
 
-    fields.push('updated_at = strftime("%s", "now")');
+    fields.push('updated_at = strftime(\'%s\', \'now\')');
 
     const sql = `UPDATE channels SET ${fields.join(', ')} WHERE id = @id`;
     db.prepare(sql).run(params);
