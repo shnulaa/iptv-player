@@ -24,6 +24,13 @@ backend/data/
 .env.test.local
 .env.production.local
 
+# Claude and development tools
+.claude/
+.serena/
+
+# npm configuration files
+.npmrc
+
 # IDE and editor files
 .vscode/
 .idea/
