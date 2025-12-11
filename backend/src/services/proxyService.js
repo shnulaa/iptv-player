@@ -54,19 +54,17 @@ class ProxyService {
           if (line.includes('URI="')) {
             line = line.replace(/URI="([^"]+)"/g, (match, uri) => {
               const fullUrl = this.resolveUrl(uri, streamBaseUrl, url);
-              const urlObj = new URL(baseUrl);
-              const newStreamBaseUrl = `${urlObj.protocol}//${urlObj.host}`;
-              return `URI="${newStreamBaseUrl}/api/proxy/stream?url=${encodeURIComponent(fullUrl)}"`;
+              console.log('[ProxyService] baseUrl11:', baseUrl  , ' fullUrl:', fullUrl);
+              return `URI="${baseUrl}/api/proxy/stream?url=${encodeURIComponent(fullUrl)}"`;
             });
           }
           return line;
         }
 
         // 处理TS文件或子m3u8链接
+        console.log('[ProxyService] baseUrl22:', baseUrl  , ' fullUrl:', fullUrl);
         const fullUrl = this.resolveUrl(line, streamBaseUrl, url);
-        const urlObj = new URL(baseUrl);
-        const newStreamBaseUrl = `${urlObj.protocol}//${urlObj.host}`;
-        return `${newStreamBaseUrl}/api/proxy/stream?url=${encodeURIComponent(fullUrl)}`;
+        return `${baseUrl}/api/proxy/stream?url=${encodeURIComponent(fullUrl)}`;
       });
 
       return processedLines.join('\n');
