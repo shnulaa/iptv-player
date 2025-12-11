@@ -73,10 +73,21 @@ export const proxyApi = {
     const res = await api.get<string>('/api/proxy/m3u', { params: { url } });
     return res.data;
   },
-  
+
   getHlsUrl: (url: string) => {
-    const baseUrl = window.location.origin;
+    // 获取当前协议和域名，确保与页面协议一致
+    const protocol = window.location.protocol;
+    const host = window.location.host;
+    const baseUrl = `${protocol}//${host}`;
     return `${baseUrl}/api/proxy/hls?url=${encodeURIComponent(url)}`;
+  },
+
+  getStreamUrl: (url: string) => {
+    // 获取当前协议和域名，确保与页面协议一致
+    const protocol = window.location.protocol;
+    const host = window.location.host;
+    const baseUrl = `${protocol}//${host}`;
+    return `${baseUrl}/api/proxy/stream?url=${encodeURIComponent(url)}`;
   },
 };
 
