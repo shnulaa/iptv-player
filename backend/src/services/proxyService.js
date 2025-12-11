@@ -54,6 +54,9 @@ class ProxyService {
           if (line.includes('URI="')) {
             line = line.replace(/URI="([^"]+)"/g, (match, uri) => {
               const fullUrl = this.resolveUrl(uri, streamBaseUrl, url);
+              const protocol = window.location.protocol;
+              const host = window.location.host;
+              const baseUrl = `${protocol}//${host}`;
               return `URI="${baseUrl}/api/proxy/stream?url=${encodeURIComponent(fullUrl)}"`;
             });
           }
@@ -62,6 +65,9 @@ class ProxyService {
 
         // 处理TS文件或子m3u8链接
         const fullUrl = this.resolveUrl(line, streamBaseUrl, url);
+        const protocol = window.location.protocol;
+        const host = window.location.host;
+        const baseUrl = `${protocol}//${host}`;
         return `${baseUrl}/api/proxy/stream?url=${encodeURIComponent(fullUrl)}`;
       });
 
