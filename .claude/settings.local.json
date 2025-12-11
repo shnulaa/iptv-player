@@ -19,7 +19,8 @@
       "Bash(docker-compose down:*)",
       "Bash(docker compose:*)",
       "Bash(git checkout:*)",
-      "Bash(git stash:*)"
+      "Bash(git stash:*)",
+      "Bash(git rebase:*)"
     ]
   }
 }
